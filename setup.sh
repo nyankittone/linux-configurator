@@ -190,9 +190,8 @@ export BAT_THEME="ansi"\
 }
 
 main() {
-    what?
     # If we're not running as root, get the fuck outta here.
-    if [ "$(id -u)" != 0 ]; then
+    if [ "$(id -u)" -gt 0 ]; then
         die 1 only root user may run this script!
     fi
 
