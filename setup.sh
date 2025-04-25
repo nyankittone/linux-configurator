@@ -111,20 +111,17 @@ configure_system() {
     done
 
     # Start by updating the system
+    shout Updating the system...
     apt update
     apt -y upgrade
 
     # Remove packages that are unwanted (e.g. nano)
+    shout Trimming some fat...
     apt -y purge nano
     apt -y autopurge
 
-    # Install packages that I want on the system
-    # I need:
-    # practical CLI tools (lsd, bat, fzf, tmux)
-    # fun CLI tools (cmatrix, cowsay, sl)
-    # development tools (gcc, clang, g++, make, golang, python3, nodejs, npm, clangd, gopls)
-    # system components (sudo, dbus, dbus-user-session, systemd-timesyncd, timeshift, network-manager)
-    # laptop: system components (powerprofilesctl)
+    # Decide what packages must get installed, and install them
+    shout Installing packages through apt...
     local packages
     packages='
         lsd bat fzf tmux git curl wget ed htop jq links
@@ -133,7 +130,7 @@ configure_system() {
         sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager man-db apparmor
         btrfs-progs eject bluetooth polkitd manpages-dev ntfs-3g
         pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils zip
-        mpv imagemagick
+        mpv imagemagick ffmpeg yt-dlp
     '
 
     [ "$system_type" = "laptop" ] && packages="$packages"'
@@ -155,11 +152,49 @@ configure_system() {
     '
 
     apt -y install $packages
+
+    # Configuring various aspects of the system, now that there's stuff on the machine to configure
+    ## btrfs setup
+    ## timeshift setup
+    ## swapfile setup
+    ## installing dotfiles
+
+    shout Replacing config files...
+    rm -rvf /etc/skel
+    cp -rv dotfiles/skel /etc
+
+    mkdir -pv /etc/sudoers.d
+    cp -rv dotfiles/sudoers.d/* /etc/sudoers.d/
+
+    git clone https://github.com/nyankittone/bashrc
+    cp -rvf bashrc/bash.bashrc /etc
+
+    # Most sketchy part of the script so far...
+    sed -i '9a\
+PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin"\
+[ -d "$HOME/.local/bin" ] && PATH="$PATH:$HOME/.local/bin"\
+[ -d "$HOME/bin" ] && PATH="$PATH:$HOME/bin"\
+PATH="$PATH:."\
+export PATH\
+
+# Here'"'"'s a good place to put your own global environment variables!\
+export EDITOR=nvim\
+
+export XDG_CONFIG_HOME="$HOME/.config"\
+export XDG_CACHE_HOME="$HOME/.cache"\
+export XDG_DATA_HOME="$HOME/.local/share"\
+export XDG_STATE_HOME="$HOME/.local/state"\
+\
+export BAT_THEME="ansi"\
+' /etc/profile
 }
 
 main() {
+    what?
     # If we're not running as root, get the fuck outta here.
-    # 
+    if [ "$(id -u)" != 0 ]; then
+        die 1 only root user may run this script!
+    fi
 
     # Start by polling the user for important info, like:
     # who is the user?
@@ -184,6 +219,10 @@ main() {
             target_user="$target_user"
     fi
 }
+
+wd=$(dirname "$0")
+cd "$wd"
+unset wd
 
 main "$@"
 
