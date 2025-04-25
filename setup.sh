@@ -161,10 +161,10 @@ configure_system() {
 
     shout Replacing config files...
     rm -rvf /etc/skel
-    cp -rv dotfiles/skel /etc/
+    cp -rv dotfiles/common/skel /etc/
 
     mkdir -pv /etc/sudoers.d
-    cp -rv dotfiles/sudoers.d/* /etc/sudoers.d/
+    cp -rv dotfiles/common/sudoers.d/* /etc/sudoers.d/
 
     git clone https://github.com/nyankittone/bashrc
     cp -rvf bashrc/bash.bashrc /etc/
@@ -188,14 +188,46 @@ export XDG_STATE_HOME="$HOME/.local/state"\
 export BAT_THEME="ansi"\
 ' /etc/profile
 
-    cp -rvf default/* /etc/default/
+    cp -rvf dotfiles/common/default/ /etc/default/
 
     # TODO: have this line be different if installing on a non-systemd system
     shout Restarting some services...
     systemctl restart console-setup
 
     # Install the Nix package manager. TODO: do something about this modifying your bashrc file...
+    shout Installing Nix...
     yes | bash <(curl -L https://nixos.org/nix/install) --daemon
+    cp -rvf dotfiles/nix /etc/
+    nix-channel --add https://nixos.org/channels/nixos-24.11 nixpkgs
+    nix-channel --add https://nixos.org/channels/nixos-24.11 stable
+    nix-channel --add https://nixos.org/channels/nixos-unstable unstable
+    nix-channel --update
+
+    # I'm going to use system-manager for globally installing Neovim via Nix, in the future, I may
+    # want to instead build nvim from source for this. It may be simpler than doing it this way.
+    shout Configuring system-manager...
+    mkdir -p /usr/local/etc/
+    cp -rvf dotfiles/common/local-etc/system-manager /usr/local/etc
+    local wd
+    wd=$(pwd)
+    cd /usr/local/etc
+    nix run 'github:numtide/system-manager' -- switch --flake .
+    cd "$wd"
+    unset wd
+
+    # Create user (if we need to), and su into that user
+    useradd -D -s /bin/bash
+    groupadd -r sudo || :
+    if [ -n "${target_password+deez}" ]; then
+        shout Setting up a new user...
+        useradd -mG sudo "$target_user"
+
+        if [ -n "$target_password" ]; then
+            passwd -s "$target_user" <<< "$target_password"
+        else
+            passwd -d "$target_user"
+        fi
+    fi
 }
 
 main() {
