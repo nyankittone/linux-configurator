@@ -126,7 +126,7 @@ configure_system() {
     packages='
         lsd bat fzf tmux git curl wget ed htop jq links
         cmatrix cowsay sl cava fastfetch
-        gcc clang g++ make golang python3 nodejs npm clangd gopls gdb
+        gcc clang g++ make golang python3 clangd gopls gdb
         sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager man-db apparmor
         btrfs-progs eject bluetooth polkitd manpages-dev ntfs-3g
         pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils zip
@@ -176,10 +176,10 @@ PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin"\
 [ -d "$HOME/bin" ] && PATH="$PATH:$HOME/bin"\
 PATH="$PATH:."\
 export PATH\
-
+\
 # Here'"'"'s a good place to put your own global environment variables!\
 export EDITOR=nvim\
-
+\
 export XDG_CONFIG_HOME="$HOME/.config"\
 export XDG_CACHE_HOME="$HOME/.cache"\
 export XDG_DATA_HOME="$HOME/.local/share"\
