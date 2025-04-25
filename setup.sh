@@ -155,6 +155,10 @@ configure_system() {
 
     # Configuring various aspects of the system, now that there's stuff on the machine to configure
     ## btrfs setup
+    ## read fstab to see current mountpoints
+    ## if the root is mounted from the BTRFS root, or it's not btrfs, give up
+    ## create /btrfs mountpoint which mounts BTRFS root
+
     ## timeshift setup
     ## swapfile setup
     ## installing dotfiles
@@ -219,9 +223,12 @@ export BAT_THEME="ansi"\
 
     # Create user (if we need to), and su into that user
     useradd -D -s /bin/bash
-    groupadd -r sudo || :
+    groupadd -r sudo || true
     if [ -n "${target_password+deez}" ]; then
         shout Setting up a new user...
+        echo user: "$target_user"
+        echo password: "$target_password"
+
         useradd -mG sudo "$target_user"
 
         if [ -n "$target_password" ]; then
