@@ -1,0 +1,16 @@
+PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin"
+[ -d "$HOME/.local/bin" ] && PATH="$PATH:$HOME/.local/bin"
+[ -d "$HOME/bin" ] && PATH="$PATH:$HOME/bin"
+PATH="$PATH:."
+export PATH
+
+# Here is a good place to put globally defined environment variables!
+export EDITOR=nvim
+
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+export BAT_THEME="ansi"
+

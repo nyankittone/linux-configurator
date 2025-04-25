@@ -1,0 +1,4 @@
+%sudo ALL=(ALL:ALL) ALL
+Defaults insults
+Defaults timestamp_timeout=2
+
