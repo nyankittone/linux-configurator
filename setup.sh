@@ -131,13 +131,13 @@ configure_system() {
         cmatrix cowsay sl cava fastfetch
         gcc clang g++ make golang python3 nodejs npm clangd gopls gdb
         sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager man-db apparmor
-        btrfs-progs eject bluetooth polkit manpages-dev manpages-posix ntfs-3g
+        btrfs-progs eject bluetooth polkitd manpages-dev ntfs-3g
         pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils zip
         mpv imagemagick
     '
 
     [ "$system_type" = "laptop" ] && packages="$packages"'
-        powerprofilesctl        
+        power-profiles-daemon
     ' || true
 
     [ "$window_system" != none ] && packages="$packages"'
