@@ -197,6 +197,8 @@ export BAT_THEME="ansi"\
     # Install the Nix package manager. TODO: do something about this modifying your bashrc file...
     shout Installing Nix...
     yes | bash <(curl -L https://nixos.org/nix/install) --daemon
+    cp -rvf dotfiles/common/nix-bashrc /etc/bashrc
+    export PATH=/nix/var/nix/profiles/default/bin:/run/system-manager/sw/bin:"$PATH"
     cp -rvf dotfiles/common/nix /etc/
     nix-channel --add https://nixos.org/channels/nixos-24.11 nixpkgs
     nix-channel --add https://nixos.org/channels/nixos-24.11 stable

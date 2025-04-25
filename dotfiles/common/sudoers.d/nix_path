@@ -1,0 +1,1 @@
+Defaults	secure_path="/nix/var/nix/profiles/default/bin:/run/system-manager/sw/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

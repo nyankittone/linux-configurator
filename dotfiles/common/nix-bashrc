@@ -1,0 +1,5 @@
+# This is the bashrc file that is used when running a nix-shell. To make the nix-shell look
+# consistent with the main system shell prompt, the main system bashrc file is sourced.
+
+. /etc/bash.bashrc
+
