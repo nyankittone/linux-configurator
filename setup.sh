@@ -129,7 +129,7 @@ configure_system() {
         gcc clang g++ make golang python3 clangd gopls gdb
         sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager man-db apparmor
         btrfs-progs eject bluetooth polkitd manpages-dev ntfs-3g
-        pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils zip
+        pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils zip xz-utils
         mpv imagemagick ffmpeg yt-dlp
     '
 
@@ -197,7 +197,7 @@ export BAT_THEME="ansi"\
     # Install the Nix package manager. TODO: do something about this modifying your bashrc file...
     shout Installing Nix...
     yes | bash <(curl -L https://nixos.org/nix/install) --daemon
-    cp -rvf dotfiles/nix /etc/
+    cp -rvf dotfiles/common/nix /etc/
     nix-channel --add https://nixos.org/channels/nixos-24.11 nixpkgs
     nix-channel --add https://nixos.org/channels/nixos-24.11 stable
     nix-channel --add https://nixos.org/channels/nixos-unstable unstable
@@ -210,7 +210,7 @@ export BAT_THEME="ansi"\
     cp -rvf dotfiles/common/local-etc/system-manager /usr/local/etc
     local wd
     wd=$(pwd)
-    cd /usr/local/etc
+    cd /usr/local/etc/system-manager
     nix run 'github:numtide/system-manager' -- switch --flake .
     cd "$wd"
     unset wd
