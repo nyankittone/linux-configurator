@@ -161,16 +161,16 @@ configure_system() {
 
     shout Replacing config files...
     rm -rvf /etc/skel
-    cp -rv dotfiles/skel /etc
+    cp -rv dotfiles/skel /etc/
 
     mkdir -pv /etc/sudoers.d
     cp -rv dotfiles/sudoers.d/* /etc/sudoers.d/
 
     git clone https://github.com/nyankittone/bashrc
-    cp -rvf bashrc/bash.bashrc /etc
+    cp -rvf bashrc/bash.bashrc /etc/
 
     # Most sketchy part of the script so far...
-    sed -i '9a\
+    sed -i '10a\
 PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/sbin:/usr/sbin"\
 [ -d "$HOME/.local/bin" ] && PATH="$PATH:$HOME/.local/bin"\
 [ -d "$HOME/bin" ] && PATH="$PATH:$HOME/bin"\
@@ -187,6 +187,15 @@ export XDG_STATE_HOME="$HOME/.local/state"\
 \
 export BAT_THEME="ansi"\
 ' /etc/profile
+
+    cp -rvf default/* /etc/default/
+
+    # TODO: have this line be different if installing on a non-systemd system
+    shout Restarting some services...
+    systemctl restart console-setup
+
+    # Install the Nix package manager. TODO: do something about this modifying your bashrc file...
+    yes | bash <(curl -L https://nixos.org/nix/install) --daemon
 }
 
 main() {
