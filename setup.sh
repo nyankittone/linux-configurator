@@ -143,13 +143,13 @@ configure_system() {
         imv flameshot playerctl
         mednafen
         x11-apps
-    '
+    ' || true
 
     [ "$window_system" = x11 ] && packages="$packages"'
         xorg xorg-dev xinit
         i3status
         xscreensaver xscreensaver-gl xscreensaver-gl-extra
-    '
+    ' || true
 
     apt -y install $packages
 
