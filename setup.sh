@@ -112,7 +112,32 @@ configure_system() {
 
     # Start by updating the system
     apt update
-    apt upgrade
+    apt -y upgrade
+
+    # Remove packages that are unwanted (e.g. nano)
+    apt -y purge nano
+    apt -y autopurge
+
+    # Install packages that I want on the system
+    # I need:
+    # practical CLI tools (lsd, bat, fzf, tmux)
+    # fun CLI tools (cmatrix, cowsay, sl)
+    # development tools (gcc, clang, g++, make, golang, python3, nodejs, npm, clangd, gopls)
+    # system components (sudo, dbus, dbus-user-session, systemd-timesyncd, timeshift, network-manager)
+    # laptop: system components (powerprofilesctl)
+    local packages
+    packages='
+        lsd bat fzf tmux git curl wget
+        cmatrix cowsay sl
+        gcc clang g++ make golang python3 nodejs npm clangd gopls
+        sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager
+    '
+
+    [ "$system_type" = "laptop" ] && packages="$packages"'
+        powerprofilesctl        
+    ' || true
+
+    apt -y install $packages
 }
 
 main() {
