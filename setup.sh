@@ -127,15 +127,32 @@ configure_system() {
     # laptop: system components (powerprofilesctl)
     local packages
     packages='
-        lsd bat fzf tmux git curl wget
-        cmatrix cowsay sl
-        gcc clang g++ make golang python3 nodejs npm clangd gopls
-        sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager
+        lsd bat fzf tmux git curl wget ed htop jq links
+        cmatrix cowsay sl cava fastfetch
+        gcc clang g++ make golang python3 nodejs npm clangd gopls gdb
+        sudo dbus dbus-user-session systemd-timesyncd timeshift network-manager man-db apparmor
+        btrfs-progs eject bluetooth polkit manpages-dev manpages-posix ntfs-3g
+        pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils zip
+        mpv imagemagick
     '
 
     [ "$system_type" = "laptop" ] && packages="$packages"'
         powerprofilesctl        
     ' || true
+
+    [ "$window_system" != none ] && packages="$packages"'
+        flatpak
+        cups
+        imv flameshot playerctl
+        mednafen
+        x11-apps
+    '
+
+    [ "$window_system" = x11 ] && packages="$packages"'
+        xorg xorg-dev xinit
+        i3status
+        xscreensaver xscreensaver-gl xscreensaver-gl-extra
+    '
 
     apt -y install $packages
 }
