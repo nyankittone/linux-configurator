@@ -149,10 +149,12 @@ configure_system() {
         imv flameshot playerctl
         mednafen
         x11-apps
+        libnotify-bin dunst
     ' || true
 
     [ "$window_system" = x11 ] && packages="$packages"'
         xorg xorg-dev xinit
+        redshift
         i3status
         xscreensaver xscreensaver-gl xscreensaver-gl-extra
     ' || true
@@ -271,7 +273,7 @@ configure_user() {
     shout Adding user configurations...
     cp -vf dotfiles/user-common/{.bashrc,.profile} ~
     if [ "$window_system" = x11 ]; then
-        sed -i 's/^### INSERSION POINT - DO NOT CHANGE THIS LINE ###$/\
+        sed -i 's/^### INSERTION POINT - DO NOT CHANGE THIS LINE ###$/\
 case "`tty`" in\
     \/dev\/tty1)\
         startx\
@@ -289,12 +291,37 @@ esac\
     mkdir -pv ~/.config/cava
     cp -rvf dotfiles/user-common/cava-config ~/.config/cava/config
 
+    mkdir -pv ~/.config/dunst
+    cp -rvf dotfiles/user-common/dunstrc ~/.config/dunst
+
+    cp -rvf dotfiles/user-common/redshift.conf ~/.config
+
     pushd ~/.config
     git clone https://github.com/nyankittone/neovim-config nvim
     git clone https://github.com/nyankittone/tmux-config tmux
     git clone https://github.com/nyankittone/fastfetch-config fastfetch
     fastfetch/install.sh
     popd
+
+    # Configuring Flatpak and installing apps through it
+    if [ "$window_system" != none ]; then 
+        shout Setting up Flatpak...
+        flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak install --user -y flathub   \
+            app.zen_browser.zen             \
+            com.github.tchx84.Flatseal      \
+            dev.vencord.Vesktop             \
+            io.github.everestapi.Olympus    \
+            org.gimp.GIMP                   \
+            org.kde.krita                   \
+            com.obsproject.Studio           \
+            org.prismlauncher.PrismLauncher \
+            io.openrct2.OpenRCT2            \
+            com.valvesoftware.Steam
+
+        flatpak override --user app.zen_browser.zen --filesystem=home --filesystem=/tmp
+        flatpak override --user dev.vencord.Vesktop --filesystem=home --filesystem=/tmp
+    fi
 
     # Install and configure X11-specific components
     if [ "$window_system" = x11 ]; then
@@ -333,19 +360,6 @@ esac\
 
         popd
     fi
-
-    # Configuring Flatpak and installing apps through it
-    shout Setting up Flatpak...
-    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    flatpak install --user -y           \
-        app.zen_browser.zen             \
-        com.github.tchx84.Flatseal      \
-        dev.vencord.Vesktop             \
-        io.github.everestapi.Olympus    \
-        org.gimp.GIMP                   \
-        org.kde.krita                   \
-        com.obsproject.Studio           \
-        org.prismlauncher.PrismLauncher
 }
 
 main() {
