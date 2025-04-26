@@ -84,6 +84,12 @@ select_user() {
     printf 'target_user=%s\ntarget_password='"'"'%s'"'"'\n' "$user" "$(sed "s/'/'\"'\"'/g" <<< "$password")"
 }
 
+# This function acts like cp, except that instead of overwriting files if there's a collision, it
+# adds a .old extension to the original file if it's old enough.
+displace() {
+    :
+}
+
 configure_system() {
     # Parse args passed over
     local system_type
@@ -117,7 +123,7 @@ configure_system() {
 
     # Remove packages that are unwanted (e.g. nano)
     shout Trimming some fat...
-    apt -y purge nano
+    apt -y purge nano vim-tiny
     apt -y autopurge
 
     # Decide what packages must get installed, and install them
@@ -221,7 +227,7 @@ export BAT_THEME="ansi"\
     cd "$wd"
     unset wd
 
-    # Create user (if we need to), and su into that user
+    # Create user (if we need to)
     useradd -D -s /bin/bash
     groupadd -r sudo || true
     if [ -n "${target_password+deez}" ]; then
@@ -237,6 +243,108 @@ export BAT_THEME="ansi"\
             passwd -d "$target_user"
         fi
     fi
+
+    # su into the user we need to be
+    # chown "$target_user":"$target_user"
+    export -f configure_user
+    export -f displace
+    export -f shout
+    su "$target_user" -c 'bash -c "set -eu; configure_user system_type='"$system_type"' window_system='"$window_system"'"'
+}
+
+configure_user() {
+    local system_type
+    local window_system
+
+    while [ -n "${1+deez}" ]; do
+        case "$(cut -d '=' -f 1 <<< "$1")" in
+            system_type)
+                system_type=$(cut -d '=' -f 2- <<< "$1")
+            ;;
+            window_system)
+                window_system=$(cut -d '=' -f 2- <<< "$1")
+            ;;
+        esac
+        shift
+    done
+
+    shout Adding user configurations...
+    cp -vf dotfiles/user-common/{.bashrc,.profile} ~
+    if [ "$window_system" = x11 ]; then
+        sed -i 's/^### INSERSION POINT - DO NOT CHANGE THIS LINE ###$/\
+case "`tty`" in\
+    /dev/tty1)\
+        startx\
+        exit\
+    ;;\
+esac\/' ~/.profile
+    else
+        sed -i '/^### INSERTION POINT - DO NOT CHANGE THIS LINE ###$/d' ~/.profile
+    fi
+
+    mkdir -pv ~/.config ~/Documents ~/Music ~/Source_Code ~/Programming ~/Public ~/Downloads \
+        ~/Videos ~/Pictures ~/.local/bin ~/.local/share
+
+    mkdir -pv ~/.config/cava
+    cp -rvf dotfiles/user-common/cava-config ~/.config/cava/config
+
+    pushd ~/.config
+    git clone https://github.com/nyankittone/neovim-config nvim
+    git clone https://github.com/nyankittone/tmux-config tmux
+    git clone https://github.com/nyankittone/fastfetch-config fastfetch
+    fastfetch/install.sh
+    popd
+
+    # Install and configure X11-specific components
+    if [ "$window_system" = x11 ]; then
+        cp -vf dotfiles/user-common/.xsession ~
+
+        shout Installing Suckless apps...
+        pushd ~/Source_Code
+        local repo_name
+
+        repo_name=dwm
+        while ! git clone https://github.com/nyankittone/dwm "$repo_name"; do
+            repo_name="$repo_name"-new
+        done
+        pushd "$repo_name"
+        cp -vf config.def.h config.h
+        make l
+        popd
+
+        repo_name=st
+        while ! git clone https://github.com/nyankittone/st "$repo_name"; do
+            repo_name="$repo_name"-new
+        done
+        pushd "$repo_name"
+        cp -vf config.def.h config.h
+        make l
+        popd
+
+        # repo_name=dmenu
+        # while ! git clone https://github.com/nyankittone/dmenu "$repo_name"; do
+        #     repo_name="$repo_name"-new
+        # done
+        # pushd "$repo_name"
+        # cp -vf config.def.h config.h
+        # make l
+        # popd
+
+        popd
+    fi
+
+    # Configuring Flatpak and installing apps through it
+    shout Setting up Flatpak...
+    flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    flatpak install --user -y           \
+        app.zen_browser.zen             \
+        com.github.tchx84.Flatseal      \
+        dev.vencord.Vesktop             \
+        io.github.everestapi.Olympus    \
+        org.gimp.GIMP                   \
+        org.kde.krita                   \
+        com.obsproject.Studio           \
+        org.prismlauncher.PrismLauncher
 }
 
 main() {
@@ -268,6 +376,9 @@ main() {
             target_user="$target_user"
     fi
 }
+
+CONFIGURATION_TIME=$(date +%s)
+export CONFIGURATION_TIME
 
 wd=$(dirname "$0")
 cd "$wd"
