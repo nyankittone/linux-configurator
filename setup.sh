@@ -273,11 +273,12 @@ configure_user() {
     if [ "$window_system" = x11 ]; then
         sed -i 's/^### INSERSION POINT - DO NOT CHANGE THIS LINE ###$/\
 case "`tty`" in\
-    /dev/tty1)\
+    \/dev\/tty1)\
         startx\
         exit\
     ;;\
-esac\/' ~/.profile
+esac\
+/' ~/.profile
     else
         sed -i '/^### INSERTION POINT - DO NOT CHANGE THIS LINE ###$/d' ~/.profile
     fi
