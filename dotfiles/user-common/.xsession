@@ -22,7 +22,7 @@ app_autostart() {
     flatpak run app.zen_browser.zen &
     flatpak run dev.vencord.Vesktop &
 
-    xdotool key Super_L+period
+    xdotool key Super_L+2
     st &
 }
 
