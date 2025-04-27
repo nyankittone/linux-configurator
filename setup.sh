@@ -303,6 +303,19 @@ esac\
     fastfetch/install.sh
     popd
 
+    mkdir -pv ~/.config/git
+    cp -vf dotfiles/user-common/gitconfig ~/.config/git/config
+
+    # Configuring Nix for the user
+    shout Configuring Nix for the user account...
+    nix-channel --add https://nixos.org/channels/nixos-24.11 nixpkgs
+    nix-channel --add https://nixos.org/channels/nixos-24.11 stable
+    nix-channel --add https://nixos.org/channels/nixos-unstable unstable
+    nix-channel --update
+
+    cp -rvf dotfiles/user-common/home-manager ~/.config/
+    home-manager switch
+
     # Configuring Flatpak and installing apps through it
     if [ "$window_system" != none ]; then 
         shout Setting up Flatpak...
@@ -359,7 +372,16 @@ esac\
         # popd
 
         popd
+
     fi
+
+    # Configuring default apps
+    shout Setting up default apps...
+    mkdir -pv ~/.local/share/applications
+    cp -rv dotfiles/user-common/desktop-files/* ~/.local/share/applications
+    xdg-settings set default-web-browser app.zen_browser.zen.desktop
+    xdg-mime default Vifm.desktop inode/directory
+    xdg-mime default app.zen_browser.zen application/pdf
 }
 
 main() {
